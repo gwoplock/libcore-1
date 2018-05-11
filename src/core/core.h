@@ -33,16 +33,6 @@
 #include <sys/utsname.h>
 #include <sys/resource.h>
 
-
-//for core separation
-#ifndef PACKAGE_MAGMA
-#define CORE_THREAD_STACK_SIZE 1048576
-#define CORE_SECURE_MEMORY_LENGTH 32768
-#define CORE_PAGE_LENGTH getpagesize()
-#define MAGMA_FILEPATH_MAX PATH_MAX
-#endif
-//end
-
 /**
  * The type definitions used by Magma that are not defined by the system headers.
  * The bool type requires the inclusion of stdbool.h and the use of the C99.
@@ -172,13 +162,6 @@ enum {
 char * type(M_TYPE type);
 /************ TYPE ************/
 
-#define log_pedantic(...) printf(__VA_ARGS__)
-#define log_check(expr) do {} while (0)
-#define log_info(...) printf(__VA_ARGS__)
-#define log_error(...) printf(__VA_ARGS__)
-#define log_critical(...) printf(__VA_ARGS__)
-#define log_options(options, ...) printf(__VA_ARGS__)
-
 #include "memory/memory.h"
 #include "strings/strings.h"
 #include "classify/classify.h"
@@ -190,6 +173,18 @@ char * type(M_TYPE type);
 #include "parsers/parsers.h"
 #include "checksum/checksum.h"
 #include "host/host.h"
+
+// Define log macros which pass through to printf for standalone compilation. For custom logging undefine these
+// macros and replace them with the custom logging logic.
+extern bool_t log_enabled;
+extern pthread_mutex_t log_mutex;
+
+#define log_pedantic(...) do { mutex_lock(&log_mutex); if (log_enabled) printf(__VA_ARGS__); mutex_unlock(&log_mutex); } while (0)
+#define log_check(expr) do {} while (0)
+#define log_info(...) do { mutex_lock(&log_mutex); if (log_enabled) printf(__VA_ARGS__); mutex_unlock(&log_mutex); } while (0)
+#define log_error(...) do { mutex_lock(&log_mutex); if (log_enabled) printf(__VA_ARGS__); mutex_unlock(&log_mutex); } while (0)
+#define log_critical(...) do { mutex_lock(&log_mutex); if (log_enabled) printf(__VA_ARGS__); mutex_unlock(&log_mutex); } while (0)
+#define log_options(options, ...) do { mutex_lock(&log_mutex); if (log_enabled) printf(__VA_ARGS__); mutex_unlock(&log_mutex); } while (0)
 
 #endif
 

@@ -80,17 +80,40 @@
 
 #include "core/core.h"
 
-#include "providers/cryptography/cryptography.h"
-
+#define CORE_SECURE_MEMORY_ENABLED true
+#define CORE_SECURE_MEMORY_LENGTH 65536
+#define CORE_THREAD_STACK_SIZE 1048576
+#define CORE_PAGE_LENGTH getpagesize()
+#define MAGMA_FILEPATH_MAX PATH_MAX
 
 extern __thread char threadBuffer[1024];
 #define bufptr (char *)&(threadBuffer)
 #define buflen sizeof(threadBuffer)
 
- static inline bool_t status(void) {
+static inline bool_t status(void) {
 	return true;
 }
 
+/// random.c
+int16_t    rand_get_int16(void);
+int32_t    rand_get_int32(void);
+int64_t    rand_get_int64(void);
+int8_t     rand_get_int8(void);
+uint16_t   rand_get_uint16(void);
+uint32_t   rand_get_uint32(void);
+uint64_t   rand_get_uint64(void);
+uint8_t    rand_get_uint8(void);
+bool_t     rand_start(void);
+void       rand_stop(void);
+size_t     rand_write(stringer_t *s);
 
+/// log.c
+void   log_disable(void);
+void   log_enable(void);
+
+/// build.c
+const   char * build_commit(void);
+const   char * build_stamp(void);
+const   char * build_version(void);
 
 #endif
